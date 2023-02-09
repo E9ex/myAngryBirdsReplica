@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ball : MonoBehaviour
 {
@@ -9,12 +10,24 @@ public class ball : MonoBehaviour
    public Rigidbody2D rb;
    private bool isPressed = false;
    public float releasetime = 0.15f;
+   public float maxdragdistance = 2f;
+   public Rigidbody2D hook;
 
    private void Update()
    {
       if (isPressed)
       {
-         rb.position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+         Vector2 mousepos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+         if (Vector3.Distance(mousepos, hook.position) > maxdragdistance)
+         {
+            rb.position = hook.position+(mousepos-hook.position).normalized * maxdragdistance;//33
+         }
+         else
+         {
+            rb.position = mousepos;
+
+         }
+       
       }
    }
 
@@ -34,8 +47,13 @@ public class ball : MonoBehaviour
 
    IEnumerator release()
    {
+      
       yield return new WaitForSeconds(releasetime);
       GetComponent<SpringJoint2D>().enabled = false;
+      this.enabled = false;
+      yield return new WaitForSeconds(5f);
+      SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
    }
    
 }
